@@ -91,7 +91,7 @@ export function RightPanel() {
   };
 
   return (
-    <aside className="flex w-80 flex-col gap-2 border-l border-border bg-sidebar p-3">
+    <aside className="flex h-full w-full md:w-80 flex-col gap-2 border-l border-border bg-sidebar p-3">
       <div className="flex gap-2">
         <Button size="sm" variant="secondary" className="flex-1" onClick={addText}>
           <Type className="mr-1.5 h-3.5 w-3.5" /> Text
