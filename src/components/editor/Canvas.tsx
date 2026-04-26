@@ -2,6 +2,7 @@ import { forwardRef, useEffect, useRef, useState } from "react";
 import { store, useStore } from "./store";
 import { DraggableLayer } from "./DraggableLayer";
 import { PhoneFrame } from "./PhoneFrame";
+import { ensureFontLoaded, preconnectGoogleFonts } from "./fonts";
 
 export const Canvas = forwardRef<HTMLDivElement>((_props, ref) => {
   const canvas = useStore((s) => s.canvas);
