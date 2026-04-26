@@ -41,15 +41,17 @@ export function LeftSidebar({ canvasRef }: Props) {
   };
 
   const exportPng = async () => {
-    if (!user) {
-      try {
-        await signInWithGoogle();
-        toast.success("Signed in. Tap Export again to download.");
-      } catch (e: any) {
-        toast.error(e?.message ?? "Sign-in failed.");
-      }
-      return;
-    }
+    // TEMP: auth bypass — treat everyone as logged in until GOOGLE_CLIENT_ID is set.
+    // To re-enable the gate, uncomment the block below.
+    // if (!user) {
+    //   try {
+    //     await signInWithGoogle();
+    //     toast.success("Signed in. Tap Export again to download.");
+    //   } catch (e: any) {
+    //     toast.error(e?.message ?? "Sign-in failed.");
+    //   }
+    //   return;
+    // }
     const node = canvasRef.current;
     if (!node) return;
     try {
@@ -228,7 +230,7 @@ export function LeftSidebar({ canvasRef }: Props) {
 
       <Button onClick={exportPng} className="w-full font-semibold">
         <Download className="mr-2 h-4 w-4" />
-        {user ? "Export PNG" : "Sign in to Export"}
+        Export PNG
       </Button>
 
       <button
