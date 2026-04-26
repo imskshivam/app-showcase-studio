@@ -47,9 +47,7 @@ function Editor() {
               </button>
             </SheetTrigger>
             <SheetContent side="left" className="w-[280px] p-0 bg-sidebar">
-              <div onClick={() => setLeftOpen(false)}>
-                <LeftSidebar canvasRef={canvasRef} />
-              </div>
+              <LeftSidebar canvasRef={canvasRef} />
             </SheetContent>
           </Sheet>
 
