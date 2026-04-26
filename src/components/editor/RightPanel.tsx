@@ -402,15 +402,8 @@ function SelectedEditor() {
           </Button>
         ))}
       </div>
-      <div>
-        <Label className="text-xs">Scale: {layer.scale.toFixed(2)}x</Label>
-        <Slider
-          value={[layer.scale * 100]}
-          min={30}
-          max={250}
-          onValueChange={([v]) => store.updateLayer(layer.id, { scale: v / 100 })}
-        />
-      </div>
+      <DeviceScale layerId={layer.id} scale={layer.scale} />
+
       <div>
         <Label className="text-xs">Z rotation: {layer.rotation.rz}°</Label>
         <Slider
