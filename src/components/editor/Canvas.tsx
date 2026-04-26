@@ -41,6 +41,7 @@ export const Canvas = forwardRef<HTMLDivElement>((_props, ref) => {
     <div
       ref={wrapRef}
       className="flex h-full w-full items-center justify-center overflow-hidden bg-background p-4"
+      style={{ touchAction: "none" }}
       onPointerDown={() => store.select(null)}
     >
       <div
