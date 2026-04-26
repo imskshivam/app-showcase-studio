@@ -16,8 +16,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { store, useStore, newId } from "./store";
 import type { ImageLayer, TextLayer } from "./types";
+import { FONTS, ensureFontLoaded } from "./fonts";
 
 export function RightPanel() {
   const layers = useStore((s) => s.layers);
