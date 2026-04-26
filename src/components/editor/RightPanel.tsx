@@ -447,3 +447,52 @@ function SelectedEditor() {
     </div>
   );
 }
+
+function DeviceScale({ layerId, scale }: { layerId: string; scale: number }) {
+  const canvas = useStore((s) => s.canvas);
+  // Phone frame base size lives in PhoneFrame.tsx (420 x 860).
+  // Compute the maximum uniform scale that still fits inside the canvas
+  // (with a small margin) so the device never overflows. Aspect ratio is
+  // preserved — no stretching.
+  const FRAME_W = 420;
+  const FRAME_H = 860;
+  const margin = 40;
+  const maxScale = Math.min(
+    (canvas.width - margin * 2) / FRAME_W,
+    (canvas.height - margin * 2) / FRAME_H,
+  );
+  const clampedMax = Math.max(0.5, Math.min(maxScale, 6));
+
+  // If current scale exceeds the max for this canvas, clamp it down.
+  if (scale > clampedMax) {
+    queueMicrotask(() => store.updateLayer(layerId, { scale: clampedMax }));
+  }
+
+  const sliderMax = Math.round(clampedMax * 100);
+  const sliderMin = 30;
+  const value = Math.min(Math.round(scale * 100), sliderMax);
+
+  return (
+    <div>
+      <div className="mb-1 flex items-center justify-between">
+        <Label className="text-xs">Mobile size: {scale.toFixed(2)}x</Label>
+        <button
+          onClick={() => store.updateLayer(layerId, { scale: clampedMax })}
+          className="text-[10px] font-semibold uppercase tracking-wider text-primary hover:underline"
+        >
+          Fit
+        </button>
+      </div>
+      <Slider
+        value={[value]}
+        min={sliderMin}
+        max={sliderMax}
+        onValueChange={([v]) => store.updateLayer(layerId, { scale: v / 100 })}
+      />
+      <p className="mt-1 text-[10px] text-muted-foreground">
+        Aspect ratio is locked — phone won't stretch or exceed the canvas.
+      </p>
+    </div>
+  );
+}
+
