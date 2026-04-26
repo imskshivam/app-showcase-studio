@@ -15,6 +15,17 @@ export const Canvas = forwardRef<HTMLDivElement>((_props, ref) => {
   const [scale, setScale] = useState(0.3);
 
   useEffect(() => {
+    preconnectGoogleFonts();
+  }, []);
+
+  // Ensure each text layer's font is loaded
+  useEffect(() => {
+    layers.forEach((l) => {
+      if (l.type === "text") ensureFontLoaded(l.fontFamily);
+    });
+  }, [layers]);
+
+  useEffect(() => {
     const update = () => {
       const el = wrapRef.current;
       if (!el) return;
