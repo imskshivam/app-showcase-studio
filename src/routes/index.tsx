@@ -1,26 +1,36 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useRef } from "react";
+import { Canvas } from "@/components/editor/Canvas";
+import { LeftSidebar } from "@/components/editor/LeftSidebar";
+import { RightPanel } from "@/components/editor/RightPanel";
+import { TopBar } from "@/components/editor/TopBar";
 
 export const Route = createFileRoute("/")({
-  component: Index,
+  component: Editor,
+  head: () => ({
+    meta: [
+      { title: "ShotForge — App Store & Play Store Screenshot Generator" },
+      {
+        name: "description",
+        content:
+          "Design beautiful App Store and Play Store screenshots. iOS & Android frames, 3D depth, draggable text and images, instant PNG export.",
+      },
+    ],
+  }),
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
+function Editor() {
+  const canvasRef = useRef<HTMLDivElement>(null);
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground">
+      <LeftSidebar canvasRef={canvasRef} />
+      <main className="flex flex-1 flex-col">
+        <TopBar />
+        <div className="flex-1 overflow-hidden">
+          <Canvas ref={canvasRef} />
+        </div>
+      </main>
+      <RightPanel />
     </div>
   );
-}
-
-function Index() {
-  return <PlaceholderIndex />;
 }
