@@ -1,6 +1,11 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { store } from "./store";
 
+type GestureUpdate = {
+  scaleDelta?: number; // multiplicative (e.g. 1.05)
+  rotateDelta?: number; // degrees added to rz
+};
+
 type Props = {
   id: string;
   x: number;
@@ -9,27 +14,81 @@ type Props = {
   scale: number; // canvas display scale
   children: ReactNode;
   onChange: (x: number, y: number) => void;
+  onGesture?: (g: GestureUpdate) => void;
 };
 
-export function DraggableLayer({ id, x, y, selected, scale, children, onChange }: Props) {
+export function DraggableLayer({
+  id,
+  x,
+  y,
+  selected,
+  scale,
+  children,
+  onChange,
+  onGesture,
+}: Props) {
   const ref = useRef<HTMLDivElement>(null);
+
+  // Active pointers tracked on this layer (for pinch / rotate)
+  const pointers = useRef<Map<number, { x: number; y: number }>>(new Map());
+  // Single-finger drag origin
   const drag = useRef<{ sx: number; sy: number; ox: number; oy: number } | null>(null);
+  // Two-finger gesture origin
+  const gesture = useRef<{ dist: number; angle: number } | null>(null);
 
   useEffect(() => {
     const onMove = (e: PointerEvent) => {
-      if (!drag.current) return;
-      const dx = (e.clientX - drag.current.sx) / scale;
-      const dy = (e.clientY - drag.current.sy) / scale;
-      onChange(drag.current.ox + dx, drag.current.oy + dy);
+      if (!pointers.current.has(e.pointerId)) return;
+      pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+      // Two-finger pinch / rotate
+      if (pointers.current.size >= 2 && onGesture) {
+        const pts = Array.from(pointers.current.values());
+        const dx = pts[1].x - pts[0].x;
+        const dy = pts[1].y - pts[0].y;
+        const dist = Math.hypot(dx, dy);
+        const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+        if (gesture.current) {
+          const scaleDelta = dist / gesture.current.dist;
+          const rotateDelta = angle - gesture.current.angle;
+          if (scaleDelta !== 1 || rotateDelta !== 0) {
+            onGesture({ scaleDelta, rotateDelta });
+          }
+        }
+        gesture.current = { dist, angle };
+        // Cancel single-finger drag while gesturing
+        drag.current = null;
+        return;
+      }
+
+      // Single-finger drag
+      if (drag.current && pointers.current.size === 1) {
+        const dx = (e.clientX - drag.current.sx) / scale;
+        const dy = (e.clientY - drag.current.sy) / scale;
+        onChange(drag.current.ox + dx, drag.current.oy + dy);
+      }
     };
-    const onUp = () => (drag.current = null);
+
+    const onUp = (e: PointerEvent) => {
+      pointers.current.delete(e.pointerId);
+      if (pointers.current.size < 2) gesture.current = null;
+      if (pointers.current.size === 0) drag.current = null;
+      else if (pointers.current.size === 1) {
+        // Reset drag origin to remaining finger
+        const [pt] = Array.from(pointers.current.values());
+        drag.current = { sx: pt.x, sy: pt.y, ox: x, oy: y };
+      }
+    };
+
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
     return () => {
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
     };
-  }, [scale, onChange]);
+  }, [scale, onChange, onGesture, x, y]);
 
   return (
     <div
@@ -37,7 +96,19 @@ export function DraggableLayer({ id, x, y, selected, scale, children, onChange }
       onPointerDown={(e) => {
         e.stopPropagation();
         store.select(id);
-        drag.current = { sx: e.clientX, sy: e.clientY, ox: x, oy: y };
+        pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (pointers.current.size === 1) {
+          drag.current = { sx: e.clientX, sy: e.clientY, ox: x, oy: y };
+        } else if (pointers.current.size === 2) {
+          const pts = Array.from(pointers.current.values());
+          const dx = pts[1].x - pts[0].x;
+          const dy = pts[1].y - pts[0].y;
+          gesture.current = {
+            dist: Math.hypot(dx, dy),
+            angle: (Math.atan2(dy, dx) * 180) / Math.PI,
+          };
+          drag.current = null;
+        }
       }}
       style={{
         position: "absolute",
@@ -47,6 +118,7 @@ export function DraggableLayer({ id, x, y, selected, scale, children, onChange }
         cursor: "move",
         outline: selected ? "2px dashed rgba(190, 240, 100, 0.9)" : "none",
         outlineOffset: 6,
+        touchAction: "none", // disable browser pan/zoom so we own gestures
       }}
     >
       {children}
