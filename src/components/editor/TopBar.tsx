@@ -22,15 +22,17 @@ export function TopBar() {
   };
 
   return (
-    <div className="flex h-14 items-center justify-between border-b border-border bg-sidebar px-4">
-      <Button size="sm" variant="secondary" onClick={addPhone}>
-        <Plus className="mr-1.5 h-4 w-4" /> Add Screenshot
+    <div className="flex h-12 sm:h-14 items-center justify-between gap-2 border-b border-border bg-sidebar px-2 sm:px-4">
+      <Button size="sm" variant="secondary" onClick={addPhone} className="shrink-0">
+        <Plus className="mr-1 h-4 w-4 sm:mr-1.5" />
+        <span className="hidden xs:inline sm:inline">Add Screenshot</span>
+        <span className="xs:hidden sm:hidden">Add</span>
       </Button>
 
       <div className="flex items-center gap-1 rounded-full border border-border bg-surface p-1">
         <button
           onClick={() => store.set({ viewMode: "flat" })}
-          className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium transition ${
+          className={`flex items-center gap-1.5 rounded-full px-3 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm font-medium transition ${
             viewMode === "flat"
               ? "bg-background text-foreground shadow"
               : "text-muted-foreground hover:text-foreground"
@@ -40,7 +42,7 @@ export function TopBar() {
         </button>
         <button
           onClick={() => store.set({ viewMode: "3d" })}
-          className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium transition ${
+          className={`flex items-center gap-1.5 rounded-full px-3 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm font-medium transition ${
             viewMode === "3d"
               ? "bg-background text-foreground shadow"
               : "text-muted-foreground hover:text-foreground"
@@ -50,7 +52,7 @@ export function TopBar() {
         </button>
       </div>
 
-      <div className="text-xs text-muted-foreground">
+      <div className="hidden sm:block text-xs text-muted-foreground">
         {screenshots} screenshot{screenshots === 1 ? "" : "s"}
       </div>
     </div>

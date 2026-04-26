@@ -34,7 +34,7 @@ export function LeftSidebar({ canvasRef }: Props) {
   };
 
   return (
-    <aside className="flex w-64 flex-col gap-4 border-r border-border bg-sidebar p-4">
+    <aside className="flex h-full w-full md:w-64 flex-col gap-4 border-r border-border bg-sidebar p-4 overflow-y-auto">
       <div className="flex items-center gap-2">
         <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
           <Smartphone className="h-4 w-4" />
