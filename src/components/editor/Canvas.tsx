@@ -85,6 +85,19 @@ export const Canvas = forwardRef<HTMLDivElement>((_props, ref) => {
                     selected={sel}
                     scale={scale}
                     onChange={(x, y) => store.updateLayer(l.id, { x, y })}
+                    onGesture={({ scaleDelta, rotateDelta }) => {
+                      const nextScale = Math.min(
+                        6,
+                        Math.max(0.3, l.scale * (scaleDelta ?? 1)),
+                      );
+                      store.updateLayer(l.id, {
+                        scale: nextScale,
+                        rotation: {
+                          ...l.rotation,
+                          rz: l.rotation.rz + (rotateDelta ?? 0),
+                        },
+                      });
+                    }}
                   >
                     <PhoneFrame layer={l} is3D={viewMode === "3d"} />
                   </DraggableLayer>
