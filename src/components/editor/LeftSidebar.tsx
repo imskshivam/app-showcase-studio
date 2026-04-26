@@ -230,7 +230,7 @@ export function LeftSidebar({ canvasRef }: Props) {
 
       <Button onClick={exportPng} className="w-full font-semibold">
         <Download className="mr-2 h-4 w-4" />
-        {user ? "Export PNG" : "Sign in to Export"}
+        Export PNG
       </Button>
 
       <button
