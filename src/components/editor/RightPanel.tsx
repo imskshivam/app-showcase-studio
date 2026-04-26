@@ -16,8 +16,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { store, useStore, newId } from "./store";
 import type { ImageLayer, TextLayer } from "./types";
+import { FONTS, ensureFontLoaded } from "./fonts";
 
 export function RightPanel() {
   const layers = useStore((s) => s.layers);
@@ -283,6 +293,46 @@ function SelectedEditor() {
             onChange={(e) => store.updateLayer(layer.id, { text: e.target.value })}
             rows={2}
           />
+        </div>
+        <div>
+          <Label className="text-xs">Font</Label>
+          <Select
+            value={layer.fontFamily}
+            onValueChange={(v) => {
+              ensureFontLoaded(v);
+              store.updateLayer(layer.id, { fontFamily: v });
+            }}
+          >
+            <SelectTrigger className="h-9">
+              <SelectValue>
+                <span style={{ fontFamily: layer.fontFamily }}>
+                  {FONTS.find((f) => f.family === layer.fontFamily)?.label ?? "Custom"}
+                </span>
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent className="max-h-72">
+              {(["System", "Sans", "Serif", "Display", "Handwriting", "Mono"] as const).map(
+                (cat) => {
+                  const items = FONTS.filter((f) => f.category === cat);
+                  if (!items.length) return null;
+                  return (
+                    <SelectGroup key={cat}>
+                      <SelectLabel>{cat}</SelectLabel>
+                      {items.map((f) => (
+                        <SelectItem
+                          key={f.family}
+                          value={f.family}
+                          onPointerEnter={() => ensureFontLoaded(f.family)}
+                        >
+                          <span style={{ fontFamily: f.family }}>{f.label}</span>
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  );
+                },
+              )}
+            </SelectContent>
+          </Select>
         </div>
         <div className="grid grid-cols-2 gap-2">
           <div>

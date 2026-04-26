@@ -2,6 +2,7 @@ import { forwardRef, useEffect, useRef, useState } from "react";
 import { store, useStore } from "./store";
 import { DraggableLayer } from "./DraggableLayer";
 import { PhoneFrame } from "./PhoneFrame";
+import { ensureFontLoaded, preconnectGoogleFonts } from "./fonts";
 
 export const Canvas = forwardRef<HTMLDivElement>((_props, ref) => {
   const canvas = useStore((s) => s.canvas);
@@ -12,6 +13,17 @@ export const Canvas = forwardRef<HTMLDivElement>((_props, ref) => {
 
   const wrapRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.3);
+
+  useEffect(() => {
+    preconnectGoogleFonts();
+  }, []);
+
+  // Ensure each text layer's font is loaded
+  useEffect(() => {
+    layers.forEach((l) => {
+      if (l.type === "text") ensureFontLoaded(l.fontFamily);
+    });
+  }, [layers]);
 
   useEffect(() => {
     const update = () => {
