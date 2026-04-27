@@ -7,7 +7,7 @@ import { RightPanel } from "@/components/editor/RightPanel";
 import { TopBar } from "@/components/editor/TopBar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/editor")({
   component: Editor,
   head: () => ({
     meta: [
