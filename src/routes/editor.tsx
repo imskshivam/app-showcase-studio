@@ -11,7 +11,7 @@ export const Route = createFileRoute("/editor")({
   component: Editor,
   head: () => ({
     meta: [
-      { title: "ShotForge — App Store & Play Store Screenshot Generator" },
+      { title: "Editor — ShotForge" },
       {
         name: "description",
         content:
