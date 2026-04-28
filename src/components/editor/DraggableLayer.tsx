@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { store } from "./store";
 
 type GestureUpdate = {
@@ -34,7 +34,34 @@ export function DraggableLayer({
   showResizeHandle,
 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
   const resize = useRef<{ startDist: number } | null>(null);
+  // Visible (transformed) bounds of the children, in CSS pixels relative to the wrapper center.
+  const [bounds, setBounds] = useState<{ w: number; h: number }>({ w: 0, h: 0 });
+
+  // Measure the rendered size of the children so the resize handle can sit on
+  // the visible bottom-right corner even when children apply their own scale
+  // transform (e.g. PhoneFrame scaled by layer.scale).
+  useLayoutEffect(() => {
+    if (!innerRef.current || !ref.current) return;
+    const measure = () => {
+      const inner = innerRef.current?.getBoundingClientRect();
+      if (!inner) return;
+      // Divide by the canvas display scale by comparing to wrapper rect — but
+      // since both are in the same scaled coordinate space, raw pixel size is
+      // fine for placing the absolute-positioned handle.
+      setBounds({ w: inner.width, h: inner.height });
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(innerRef.current);
+    // Also re-measure when ancestors change (transform updates trigger this via children)
+    const id = setInterval(measure, 250);
+    return () => {
+      ro.disconnect();
+      clearInterval(id);
+    };
+  });
 
   // Active pointers tracked on this layer (for pinch / rotate)
   const pointers = useRef<Map<number, { x: number; y: number }>>(new Map());
@@ -128,33 +155,25 @@ export function DraggableLayer({
         touchAction: "none", // disable browser pan/zoom so we own gestures
       }}
     >
-      {children}
-      {selected && showResizeHandle && onResize && (
+      <div ref={innerRef} style={{ display: "inline-block" }}>
+        {children}
+      </div>
+      {selected && showResizeHandle && onResize && bounds.w > 0 && (
         <div
           onPointerDown={(e) => {
             e.stopPropagation();
             e.preventDefault();
-            const rect = ref.current?.getBoundingClientRect();
-            if (!rect) return;
-            const startDiag = Math.hypot(rect.width, rect.height) || 1;
+            const startDiag = Math.hypot(bounds.w, bounds.h) || 1;
             const startX = e.clientX;
             const startY = e.clientY;
-            // Outward direction from element center to the handle (bottom-right).
-            // Project pointer movement onto this direction so dragging
-            // out = grow, dragging in = shrink, regardless of angle.
             const dirX = Math.SQRT1_2;
             const dirY = Math.SQRT1_2;
             let lastFactor = 1;
             const move = (ev: PointerEvent) => {
               const dx = ev.clientX - startX;
               const dy = ev.clientY - startY;
-              const projected = dx * dirX + dy * dirY; // screen px along diagonal
-              // Convert screen delta to factor relative to original diagonal.
-              // Multiply by ~2 because diagonal grows on both sides of center.
-              const factor = Math.max(
-                0.1,
-                1 + (projected * 2) / startDiag,
-              );
+              const projected = dx * dirX + dy * dirY;
+              const factor = Math.max(0.1, 1 + (projected * 2) / startDiag);
               const delta = factor / lastFactor;
               if (Math.abs(delta - 1) > 0.001) {
                 onResize(delta);
@@ -173,8 +192,9 @@ export function DraggableLayer({
           title="Drag to resize"
           style={{
             position: "absolute",
-            right: -10,
-            bottom: -10,
+            // Center of wrapper is at 0,0; visible content extends ±bounds/2.
+            left: `calc(50% + ${bounds.w / 2 - 10}px)`,
+            top: `calc(50% + ${bounds.h / 2 - 10}px)`,
             width: 20,
             height: 20,
             borderRadius: 4,
