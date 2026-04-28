@@ -1,6 +1,7 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 
 function NotFoundComponent() {
   return (
@@ -71,5 +72,10 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  return <Outlet />;
+  return (
+    <>
+      <AnalyticsTracker />
+      <Outlet />
+    </>
+  );
 }
