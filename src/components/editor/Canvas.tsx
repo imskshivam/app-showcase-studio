@@ -251,6 +251,10 @@ function ScreenView({
                         });
                       }}
                     >
+                      <div
+                        style={{
+                          width: l.width,
+                          fontSize: l.fontSize,
                           color: l.color,
                           fontWeight: l.fontWeight,
                           fontFamily: l.fontFamily,
