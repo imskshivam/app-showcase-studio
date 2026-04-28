@@ -11,14 +11,14 @@ import {
   type Analytics,
 } from "firebase/analytics";
 
-export const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID",
-  measurementId: "G-XXXXXXXXXX",
+const firebaseConfig = {
+  apiKey: "AIzaSyCWYvAEmomDFv5QBjqYXBzYBdxOlc362yE",
+  authDomain: "markova-dd18d.firebaseapp.com",
+  projectId: "markova-dd18d",
+  storageBucket: "markova-dd18d.firebasestorage.app",
+  messagingSenderId: "676099387582",
+  appId: "1:676099387582:web:017b30533e9d2c2c63aeef",
+  measurementId: "G-MT0N0ZKQ0J"
 };
 
 let app: FirebaseApp | null = null;
