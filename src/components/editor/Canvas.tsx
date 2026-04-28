@@ -207,6 +207,11 @@ function ScreenView({
                       selected={sel}
                       scale={scale}
                       onChange={(x, y) => store.updateLayer(l.id, { x, y })}
+                      showResizeHandle
+                      onResize={(factor) => {
+                        const nextScale = Math.min(6, Math.max(0.3, l.scale * factor));
+                        store.updateLayer(l.id, { scale: nextScale });
+                      }}
                       onGesture={({ scaleDelta, rotateDelta }) => {
                         const nextScale = Math.min(
                           6,
