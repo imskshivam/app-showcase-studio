@@ -43,25 +43,25 @@ export function DraggableLayer({
   // the visible bottom-right corner even when children apply their own scale
   // transform (e.g. PhoneFrame scaled by layer.scale).
   useLayoutEffect(() => {
-    if (!innerRef.current || !ref.current) return;
+    if (!innerRef.current) return;
     const measure = () => {
       const inner = innerRef.current?.getBoundingClientRect();
       if (!inner) return;
-      // Divide by the canvas display scale by comparing to wrapper rect — but
-      // since both are in the same scaled coordinate space, raw pixel size is
-      // fine for placing the absolute-positioned handle.
-      setBounds({ w: inner.width, h: inner.height });
+      // getBoundingClientRect returns on-screen pixels (i.e. already shrunk by
+      // the canvas's display `scale` transform). Convert back to the wrapper's
+      // own (unscaled) coordinate space so the handle placement matches.
+      const s = scale || 1;
+      setBounds({ w: inner.width / s, h: inner.height / s });
     };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(innerRef.current);
-    // Also re-measure when ancestors change (transform updates trigger this via children)
     const id = setInterval(measure, 250);
     return () => {
       ro.disconnect();
       clearInterval(id);
     };
-  });
+  }, [scale]);
 
   // Active pointers tracked on this layer (for pinch / rotate)
   const pointers = useRef<Map<number, { x: number; y: number }>>(new Map());
@@ -168,10 +168,13 @@ export function DraggableLayer({
             const startY = e.clientY;
             const dirX = Math.SQRT1_2;
             const dirY = Math.SQRT1_2;
+            const s = scale || 1;
             let lastFactor = 1;
             const move = (ev: PointerEvent) => {
-              const dx = ev.clientX - startX;
-              const dy = ev.clientY - startY;
+              // Convert screen-pixel pointer delta into the unscaled canvas
+              // coordinate space so the resize ratio matches startDiag.
+              const dx = (ev.clientX - startX) / s;
+              const dy = (ev.clientY - startY) / s;
               const projected = dx * dirX + dy * dirY;
               const factor = Math.max(0.1, 1 + (projected * 2) / startDiag);
               const delta = factor / lastFactor;
