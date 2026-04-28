@@ -34,7 +34,34 @@ export function DraggableLayer({
   showResizeHandle,
 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
   const resize = useRef<{ startDist: number } | null>(null);
+  // Visible (transformed) bounds of the children, in CSS pixels relative to the wrapper center.
+  const [bounds, setBounds] = useState<{ w: number; h: number }>({ w: 0, h: 0 });
+
+  // Measure the rendered size of the children so the resize handle can sit on
+  // the visible bottom-right corner even when children apply their own scale
+  // transform (e.g. PhoneFrame scaled by layer.scale).
+  useLayoutEffect(() => {
+    if (!innerRef.current || !ref.current) return;
+    const measure = () => {
+      const inner = innerRef.current?.getBoundingClientRect();
+      if (!inner) return;
+      // Divide by the canvas display scale by comparing to wrapper rect — but
+      // since both are in the same scaled coordinate space, raw pixel size is
+      // fine for placing the absolute-positioned handle.
+      setBounds({ w: inner.width, h: inner.height });
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(innerRef.current);
+    // Also re-measure when ancestors change (transform updates trigger this via children)
+    const id = setInterval(measure, 250);
+    return () => {
+      ro.disconnect();
+      clearInterval(id);
+    };
+  });
 
   // Active pointers tracked on this layer (for pinch / rotate)
   const pointers = useRef<Map<number, { x: number; y: number }>>(new Map());
