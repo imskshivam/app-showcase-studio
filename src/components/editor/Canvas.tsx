@@ -280,6 +280,13 @@ function ScreenView({
                     selected={sel}
                     scale={scale}
                     onChange={(x, y) => store.updateLayer(l.id, { x, y })}
+                    showResizeHandle
+                    onResize={(factor) => {
+                      store.updateLayer(l.id, {
+                        width: Math.min(4000, Math.max(20, l.width * factor)),
+                        height: Math.min(4000, Math.max(20, l.height * factor)),
+                      });
+                    }}
                   >
                     <img
                       src={l.src}
