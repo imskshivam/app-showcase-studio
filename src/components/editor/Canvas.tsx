@@ -243,11 +243,14 @@ function ScreenView({
                       selected={sel}
                       scale={scale}
                       onChange={(x, y) => store.updateLayer(l.id, { x, y })}
+                      showResizeHandle
+                      onResize={(factor) => {
+                        store.updateLayer(l.id, {
+                          fontSize: Math.min(800, Math.max(8, l.fontSize * factor)),
+                          width: Math.min(4000, Math.max(40, l.width * factor)),
+                        });
+                      }}
                     >
-                      <div
-                        style={{
-                          width: l.width,
-                          fontSize: l.fontSize,
                           color: l.color,
                           fontWeight: l.fontWeight,
                           fontFamily: l.fontFamily,
