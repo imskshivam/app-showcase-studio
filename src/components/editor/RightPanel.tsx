@@ -25,14 +25,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { store, useStore, newId } from "./store";
+import { store, useStore, newId, selectLayers, selectSelectedId, selectBackground } from "./store";
 import type { ImageLayer, TextLayer } from "./types";
 import { FONTS, ensureFontLoaded } from "./fonts";
 
 export function RightPanel() {
-  const layers = useStore((s) => s.layers);
-  const selectedId = useStore((s) => s.selectedId);
-  const bg = useStore((s) => s.background);
+  const layers = useStore(selectLayers);
+  const selectedId = useStore(selectSelectedId);
+  const bg = useStore(selectBackground);
   const selected = layers.find((l) => l.id === selectedId);
   const fileRef = useRef<HTMLInputElement>(null);
   const bgFileRef = useRef<HTMLInputElement>(null);
@@ -84,7 +84,7 @@ export function RightPanel() {
     if (!f) return;
     const r = new FileReader();
     r.onload = () =>
-      store.set({ background: { ...bg, kind: "image", image: r.result as string } });
+      store.setBackground({ ...bg, kind: "image", image: r.result as string });
     r.readAsDataURL(f);
     e.target.value = "";
   };
@@ -149,7 +149,7 @@ export function RightPanel() {
                     size="sm"
                     variant={bg.kind === k ? "default" : "secondary"}
                     className="flex-1 capitalize"
-                    onClick={() => store.set({ background: { ...bg, kind: k } })}
+                    onClick={() => store.setBackground({ ...bg, kind: k })}
                   >
                     {k}
                   </Button>
@@ -161,7 +161,7 @@ export function RightPanel() {
                   <Input
                     type="color"
                     value={bg.color1}
-                    onChange={(e) => store.set({ background: { ...bg, color1: e.target.value } })}
+                    onChange={(e) => store.setBackground({ ...bg, color1: e.target.value })}
                     className="h-9 cursor-pointer p-1"
                   />
                 </div>
@@ -171,7 +171,7 @@ export function RightPanel() {
                     <Input
                       type="color"
                       value={bg.color2}
-                      onChange={(e) => store.set({ background: { ...bg, color2: e.target.value } })}
+                      onChange={(e) => store.setBackground({ ...bg, color2: e.target.value })}
                       className="h-9 cursor-pointer p-1"
                     />
                   </div>
@@ -184,7 +184,7 @@ export function RightPanel() {
                     value={[bg.angle]}
                     min={0}
                     max={360}
-                    onValueChange={([v]) => store.set({ background: { ...bg, angle: v } })}
+                    onValueChange={([v]) => store.setBackground({ ...bg, angle: v })}
                   />
                 </div>
               )}
@@ -277,8 +277,8 @@ export function RightPanel() {
 }
 
 function SelectedEditor() {
-  const selectedId = useStore((s) => s.selectedId);
-  const layers = useStore((s) => s.layers);
+  const selectedId = useStore(selectSelectedId);
+  const layers = useStore(selectLayers);
   const viewMode = useStore((s) => s.viewMode);
   const layer = layers.find((l) => l.id === selectedId);
   if (!layer) return null;
