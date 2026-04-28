@@ -94,7 +94,7 @@ export function LeftSidebar({ canvasRef }: Props) {
           <Smartphone className="h-4 w-4" />
         </div>
         <div>
-          <h1 className="text-sm font-bold leading-none">ShotForge</h1>
+          <h1 className="text-sm font-bold leading-none">Markva</h1>
           <p className="text-[11px] text-muted-foreground">App store screenshots</p>
         </div>
       </div>
