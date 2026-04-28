@@ -15,6 +15,10 @@ type Props = {
   children: ReactNode;
   onChange: (x: number, y: number) => void;
   onGesture?: (g: GestureUpdate) => void;
+  /** Optional cursor-driven resize. Receives a multiplicative scale factor relative to gesture start. */
+  onResize?: (factor: number) => void;
+  /** When true, render a visible corner handle (used on desktop). */
+  showResizeHandle?: boolean;
 };
 
 export function DraggableLayer({
@@ -26,8 +30,11 @@ export function DraggableLayer({
   children,
   onChange,
   onGesture,
+  onResize,
+  showResizeHandle,
 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
+  const resize = useRef<{ startDist: number } | null>(null);
 
   // Active pointers tracked on this layer (for pinch / rotate)
   const pointers = useRef<Map<number, { x: number; y: number }>>(new Map());
@@ -122,6 +129,51 @@ export function DraggableLayer({
       }}
     >
       {children}
+      {selected && showResizeHandle && onResize && (
+        <div
+          onPointerDown={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            // Distance from element center to pointer; used as resize baseline.
+            const rect = ref.current?.getBoundingClientRect();
+            if (!rect) return;
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            resize.current = {
+              startDist: Math.hypot(e.clientX - cx, e.clientY - cy) || 1,
+            };
+            const move = (ev: PointerEvent) => {
+              if (!resize.current) return;
+              const dist = Math.hypot(ev.clientX - cx, ev.clientY - cy) || 1;
+              onResize(dist / resize.current.startDist);
+              resize.current.startDist = dist; // make it incremental
+            };
+            const up = () => {
+              resize.current = null;
+              window.removeEventListener("pointermove", move);
+              window.removeEventListener("pointerup", up);
+              window.removeEventListener("pointercancel", up);
+            };
+            window.addEventListener("pointermove", move);
+            window.addEventListener("pointerup", up);
+            window.addEventListener("pointercancel", up);
+          }}
+          title="Drag to resize"
+          style={{
+            position: "absolute",
+            right: -8,
+            bottom: -8,
+            width: 18,
+            height: 18,
+            borderRadius: 4,
+            background: "rgba(190, 240, 100, 0.95)",
+            border: "2px solid rgba(20, 30, 10, 0.6)",
+            cursor: "nwse-resize",
+            touchAction: "none",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.4)",
+          }}
+        />
+      )}
     </div>
   );
 }
