@@ -168,10 +168,13 @@ export function DraggableLayer({
             const startY = e.clientY;
             const dirX = Math.SQRT1_2;
             const dirY = Math.SQRT1_2;
+            const s = scale || 1;
             let lastFactor = 1;
             const move = (ev: PointerEvent) => {
-              const dx = ev.clientX - startX;
-              const dy = ev.clientY - startY;
+              // Convert screen-pixel pointer delta into the unscaled canvas
+              // coordinate space so the resize ratio matches startDiag.
+              const dx = (ev.clientX - startX) / s;
+              const dy = (ev.clientY - startY) / s;
               const projected = dx * dirX + dy * dirY;
               const factor = Math.max(0.1, 1 + (projected * 2) / startDiag);
               const delta = factor / lastFactor;
