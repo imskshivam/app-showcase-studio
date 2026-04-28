@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { store, useStore } from "./store";
+import { store, useStore, selectLayers } from "./store";
 import { PRESET_SIZES } from "./types";
 import { toPng } from "html-to-image";
 import { useState } from "react";
@@ -23,7 +23,7 @@ const CUSTOM_LABEL = "Custom (px × px)";
 export function LeftSidebar({ canvasRef }: Props) {
   const platform = useStore((s) => s.platform);
   const canvas = useStore((s) => s.canvas);
-  const layers = useStore((s) => s.layers);
+  const layers = useStore(selectLayers);
   const user = useAuth();
 
   const isCustom = !PRESET_SIZES.some((p) => p.label === canvas.label);
@@ -81,8 +81,10 @@ export function LeftSidebar({ canvasRef }: Props) {
   };
 
   const clearAll = () => {
-    if (!confirm("Clear all layers and reset?")) return;
-    store.set({ layers: [] });
+    if (!confirm("Clear all layers in this screen?")) return;
+    store.get().screens
+      .find((s) => s.id === store.get().activeScreenId)
+      ?.layers.forEach((l) => store.removeLayer(l.id));
   };
 
   return (
@@ -145,8 +147,17 @@ export function LeftSidebar({ canvasRef }: Props) {
           value={platform}
           onValueChange={(v: "ios" | "android") => {
             store.set({ platform: v });
-            store.get().layers.forEach((l) => {
-              if (l.type === "device") store.updateLayer(l.id, { platform: v });
+            // Sync platform across every screen's device layers
+            store.get().screens.forEach((sc) => {
+              sc.layers.forEach((l) => {
+                if (l.type === "device") {
+                  // updateLayer only touches active screen; switch active first
+                  const prev = store.get().activeScreenId;
+                  store.selectScreen(sc.id);
+                  store.updateLayer(l.id, { platform: v });
+                  store.selectScreen(prev);
+                }
+              });
             });
           }}
         >
