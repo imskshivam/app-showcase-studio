@@ -1,9 +1,9 @@
 {
-  "name": "shotforge-auth-server",
+  "name": "markva-auth-server",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Standalone Google OAuth verification server for ShotForge. Run separately from the frontend.",
+  "description": "Standalone Google OAuth verification server for Markva. Run separately from the frontend.",
   "scripts": {
     "dev": "node --watch index.js",
     "start": "node index.js"

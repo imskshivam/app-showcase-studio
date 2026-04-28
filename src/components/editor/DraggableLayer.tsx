@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { store } from "./store";
 
 type GestureUpdate = {
@@ -15,10 +15,6 @@ type Props = {
   children: ReactNode;
   onChange: (x: number, y: number) => void;
   onGesture?: (g: GestureUpdate) => void;
-  /** Optional cursor-driven resize. Receives a multiplicative scale factor relative to gesture start. */
-  onResize?: (factor: number) => void;
-  /** When true, render a visible corner handle (used on desktop). */
-  showResizeHandle?: boolean;
 };
 
 export function DraggableLayer({
@@ -30,38 +26,8 @@ export function DraggableLayer({
   children,
   onChange,
   onGesture,
-  onResize,
-  showResizeHandle,
 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
-  const innerRef = useRef<HTMLDivElement>(null);
-  const resize = useRef<{ startDist: number } | null>(null);
-  // Visible (transformed) bounds of the children, in CSS pixels relative to the wrapper center.
-  const [bounds, setBounds] = useState<{ w: number; h: number }>({ w: 0, h: 0 });
-
-  // Measure the rendered size of the children so the resize handle can sit on
-  // the visible bottom-right corner even when children apply their own scale
-  // transform (e.g. PhoneFrame scaled by layer.scale).
-  useLayoutEffect(() => {
-    if (!innerRef.current) return;
-    const measure = () => {
-      const inner = innerRef.current?.getBoundingClientRect();
-      if (!inner) return;
-      // getBoundingClientRect returns on-screen pixels (i.e. already shrunk by
-      // the canvas's display `scale` transform). Convert back to the wrapper's
-      // own (unscaled) coordinate space so the handle placement matches.
-      const s = scale || 1;
-      setBounds({ w: inner.width / s, h: inner.height / s });
-    };
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(innerRef.current);
-    const id = setInterval(measure, 250);
-    return () => {
-      ro.disconnect();
-      clearInterval(id);
-    };
-  }, [scale]);
 
   // Active pointers tracked on this layer (for pinch / rotate)
   const pointers = useRef<Map<number, { x: number; y: number }>>(new Map());
@@ -155,61 +121,7 @@ export function DraggableLayer({
         touchAction: "none", // disable browser pan/zoom so we own gestures
       }}
     >
-      <div ref={innerRef} style={{ display: "inline-block" }}>
-        {children}
-      </div>
-      {selected && showResizeHandle && onResize && bounds.w > 0 && (
-        <div
-          onPointerDown={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            const startDiag = Math.hypot(bounds.w, bounds.h) || 1;
-            const startX = e.clientX;
-            const startY = e.clientY;
-            const dirX = Math.SQRT1_2;
-            const dirY = Math.SQRT1_2;
-            const s = scale || 1;
-            let lastFactor = 1;
-            const move = (ev: PointerEvent) => {
-              // Convert screen-pixel pointer delta into the unscaled canvas
-              // coordinate space so the resize ratio matches startDiag.
-              const dx = (ev.clientX - startX) / s;
-              const dy = (ev.clientY - startY) / s;
-              const projected = dx * dirX + dy * dirY;
-              const factor = Math.max(0.1, 1 + (projected * 2) / startDiag);
-              const delta = factor / lastFactor;
-              if (Math.abs(delta - 1) > 0.001) {
-                onResize(delta);
-                lastFactor = factor;
-              }
-            };
-            const up = () => {
-              window.removeEventListener("pointermove", move);
-              window.removeEventListener("pointerup", up);
-              window.removeEventListener("pointercancel", up);
-            };
-            window.addEventListener("pointermove", move);
-            window.addEventListener("pointerup", up);
-            window.addEventListener("pointercancel", up);
-          }}
-          title="Drag to resize"
-          style={{
-            position: "absolute",
-            // Center of wrapper is at 0,0; visible content extends ±bounds/2.
-            left: `calc(50% + ${bounds.w / 2 - 10}px)`,
-            top: `calc(50% + ${bounds.h / 2 - 10}px)`,
-            width: 20,
-            height: 20,
-            borderRadius: 4,
-            background: "rgba(190, 240, 100, 0.95)",
-            border: "2px solid rgba(20, 30, 10, 0.6)",
-            cursor: "nwse-resize",
-            touchAction: "none",
-            boxShadow: "0 2px 6px rgba(0,0,0,0.4)",
-            zIndex: 10,
-          }}
-        />
-      )}
+      {children}
     </div>
   );
 }

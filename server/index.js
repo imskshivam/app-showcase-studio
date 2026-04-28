@@ -1,4 +1,4 @@
-// Standalone Google OAuth verification server for ShotForge.
+// Standalone Google OAuth verification server for Markva.
 //
 // Why a separate server?
 //   - Verifies Google ID tokens server-side (signature + audience + expiry).
