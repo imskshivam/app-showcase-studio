@@ -134,22 +134,34 @@ export function DraggableLayer({
           onPointerDown={(e) => {
             e.stopPropagation();
             e.preventDefault();
-            // Distance from element center to pointer; used as resize baseline.
             const rect = ref.current?.getBoundingClientRect();
             if (!rect) return;
-            const cx = rect.left + rect.width / 2;
-            const cy = rect.top + rect.height / 2;
-            resize.current = {
-              startDist: Math.hypot(e.clientX - cx, e.clientY - cy) || 1,
-            };
+            const startDiag = Math.hypot(rect.width, rect.height) || 1;
+            const startX = e.clientX;
+            const startY = e.clientY;
+            // Outward direction from element center to the handle (bottom-right).
+            // Project pointer movement onto this direction so dragging
+            // out = grow, dragging in = shrink, regardless of angle.
+            const dirX = Math.SQRT1_2;
+            const dirY = Math.SQRT1_2;
+            let lastFactor = 1;
             const move = (ev: PointerEvent) => {
-              if (!resize.current) return;
-              const dist = Math.hypot(ev.clientX - cx, ev.clientY - cy) || 1;
-              onResize(dist / resize.current.startDist);
-              resize.current.startDist = dist; // make it incremental
+              const dx = ev.clientX - startX;
+              const dy = ev.clientY - startY;
+              const projected = dx * dirX + dy * dirY; // screen px along diagonal
+              // Convert screen delta to factor relative to original diagonal.
+              // Multiply by ~2 because diagonal grows on both sides of center.
+              const factor = Math.max(
+                0.1,
+                1 + (projected * 2) / startDiag,
+              );
+              const delta = factor / lastFactor;
+              if (Math.abs(delta - 1) > 0.001) {
+                onResize(delta);
+                lastFactor = factor;
+              }
             };
             const up = () => {
-              resize.current = null;
               window.removeEventListener("pointermove", move);
               window.removeEventListener("pointerup", up);
               window.removeEventListener("pointercancel", up);
@@ -161,16 +173,17 @@ export function DraggableLayer({
           title="Drag to resize"
           style={{
             position: "absolute",
-            right: -8,
-            bottom: -8,
-            width: 18,
-            height: 18,
+            right: -10,
+            bottom: -10,
+            width: 20,
+            height: 20,
             borderRadius: 4,
             background: "rgba(190, 240, 100, 0.95)",
             border: "2px solid rgba(20, 30, 10, 0.6)",
             cursor: "nwse-resize",
             touchAction: "none",
             boxShadow: "0 2px 6px rgba(0,0,0,0.4)",
+            zIndex: 10,
           }}
         />
       )}
