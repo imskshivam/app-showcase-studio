@@ -15,6 +15,10 @@ type Props = {
   children: ReactNode;
   onChange: (x: number, y: number) => void;
   onGesture?: (g: GestureUpdate) => void;
+  /** Optional cursor-driven resize. Receives a multiplicative scale factor relative to gesture start. */
+  onResize?: (factor: number) => void;
+  /** When true, render a visible corner handle (used on desktop). */
+  showResizeHandle?: boolean;
 };
 
 export function DraggableLayer({
@@ -26,8 +30,11 @@ export function DraggableLayer({
   children,
   onChange,
   onGesture,
+  onResize,
+  showResizeHandle,
 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
+  const resize = useRef<{ startDist: number } | null>(null);
 
   // Active pointers tracked on this layer (for pinch / rotate)
   const pointers = useRef<Map<number, { x: number; y: number }>>(new Map());
