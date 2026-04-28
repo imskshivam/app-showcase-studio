@@ -1,14 +1,14 @@
 import { forwardRef, useEffect, useRef, useState } from "react";
-import { store, useStore } from "./store";
+import { store, useStore, selectLayers, selectBackground, selectSelectedId } from "./store";
 import { DraggableLayer } from "./DraggableLayer";
 import { PhoneFrame } from "./PhoneFrame";
 import { ensureFontLoaded, preconnectGoogleFonts } from "./fonts";
 
 export const Canvas = forwardRef<HTMLDivElement>((_props, ref) => {
   const canvas = useStore((s) => s.canvas);
-  const bg = useStore((s) => s.background);
-  const layers = useStore((s) => s.layers);
-  const selectedId = useStore((s) => s.selectedId);
+  const bg = useStore(selectBackground);
+  const layers = useStore(selectLayers);
+  const selectedId = useStore(selectSelectedId);
   const viewMode = useStore((s) => s.viewMode);
 
   const wrapRef = useRef<HTMLDivElement>(null);
