@@ -55,6 +55,13 @@ export type Background = {
   image?: string;
 };
 
+export type Screen = {
+  id: string;
+  background: Background;
+  layers: Layer[];
+  selectedLayerId: string | null;
+};
+
 export type CanvasSize = {
   width: number;
   height: number;
