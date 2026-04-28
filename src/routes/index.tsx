@@ -20,14 +20,14 @@ export const Route = createFileRoute("/")({
   component: Home,
   head: () => ({
     meta: [
-      { title: "ShotForge — AI-crafted App Store screenshots in minutes" },
+      { title: "Markva — AI-crafted App Store screenshots in minutes" },
       {
         name: "description",
         content:
-          "ShotForge is the modern studio for App Store & Play Store screenshots. Designed with AI-grade craft, exported in seconds.",
+          "Markva is the modern studio for App Store & Play Store screenshots. Designed with AI-grade craft, exported in seconds.",
       },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { property: "og:title", content: "ShotForge — AI-crafted App Store screenshots" },
+      { property: "og:title", content: "Markva — AI-crafted App Store screenshots" },
       {
         property: "og:description",
         content:
@@ -70,7 +70,7 @@ function Nav() {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 md:px-8">
         <Link to="/" className="flex items-center gap-2 group">
           <LogoMark />
-          <span className="font-semibold tracking-tight">ShotForge</span>
+          <span className="font-semibold tracking-tight">Markva</span>
         </Link>
         <nav className="hidden md:flex items-center gap-8 text-sm text-white/70">
           <a href="#product" className="hover:text-white transition">Product</a>
@@ -152,7 +152,7 @@ function Hero() {
         </h1>
 
         <p className="mx-auto mt-7 max-w-2xl text-base md:text-lg text-white/60 leading-relaxed">
-          ShotForge is the modern studio for store screenshots. Designed with the craft of an AI
+          Markva is the modern studio for store screenshots. Designed with the craft of an AI
           atelier — drag, type, frame, export. No designer required.
         </p>
 
@@ -273,7 +273,7 @@ function PhoneMock({ variant }: { variant: "left" | "center" | "right" }) {
           <div className="absolute left-1/2 top-2 h-3 w-12 -translate-x-1/2 rounded-full bg-black/80" />
           <div className="absolute inset-0 flex flex-col items-center justify-end p-4 md:p-6 text-center">
             <div className="absolute top-10 left-0 right-0 px-4">
-              <p className="text-[10px] md:text-xs text-primary/80 uppercase tracking-[0.25em]">ShotForge</p>
+              <p className="text-[10px] md:text-xs text-primary/80 uppercase tracking-[0.25em]">Markva</p>
               <h3 className="mt-2 text-xl md:text-3xl font-display font-semibold leading-tight">
                 {headlines[variant]}
               </h3>
@@ -335,7 +335,7 @@ function Product() {
           <div className="lg:col-span-5">
             <p className="text-xs uppercase tracking-[0.3em] text-primary/80">The Product</p>
             <h2 className="mt-4 text-4xl md:text-6xl font-display tracking-tight leading-[1]">
-              ShotForge <span className="text-white/40">Studio</span>
+              Markva <span className="text-white/40">Studio</span>
             </h2>
             <p className="mt-6 text-white/60 leading-relaxed max-w-md">
               A focused canvas built for one job — making your app look unforgettable on the App
@@ -394,7 +394,7 @@ function ProductCard() {
               <Sparkles className="h-5 w-5 text-primary-foreground" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold">ShotForge Studio</h3>
+              <h3 className="text-lg font-semibold">Markva Studio</h3>
               <p className="text-xs text-white/50">Screenshot generator · v1</p>
             </div>
           </div>
@@ -553,12 +553,12 @@ function Showcase() {
 function FAQ() {
   const items = [
     {
-      q: "What is ShotForge?",
-      a: "ShotForge is an AI-grade studio for designing App Store and Play Store screenshots. Drag layers, swap device frames, write headlines, and export production-ready PNGs.",
+      q: "What is Markva?",
+      a: "Markva is an AI-grade studio for designing App Store and Play Store screenshots. Drag layers, swap device frames, write headlines, and export production-ready PNGs.",
     },
     {
       q: "Do I need a design background?",
-      a: "Not at all. ShotForge gives you sensible defaults, snapping, and presets so anyone can produce store-ready shots in minutes.",
+      a: "Not at all. Markva gives you sensible defaults, snapping, and presets so anyone can produce store-ready shots in minutes.",
     },
     {
       q: "Can I export at any pixel size?",
@@ -566,7 +566,7 @@ function FAQ() {
     },
     {
       q: "Is it free?",
-      a: "ShotForge is free to use. Open the Studio and start designing — no signup required.",
+      a: "Markva is free to use. Open the Studio and start designing — no signup required.",
     },
   ];
   const [open, setOpen] = useState<number | null>(0);
@@ -627,7 +627,7 @@ function Footer() {
       <div className="mx-auto max-w-7xl px-5 md:px-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
         <div className="flex items-center gap-2">
           <LogoMark />
-          <span className="font-semibold">ShotForge</span>
+          <span className="font-semibold">Markva</span>
           <span className="ml-3 text-xs text-white/40">© {new Date().getFullYear()}</span>
         </div>
         <div className="flex items-center gap-6 text-sm text-white/55">

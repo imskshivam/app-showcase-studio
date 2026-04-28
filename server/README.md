@@ -1,4 +1,4 @@
-# ShotForge Auth Server
+# Markva Auth Server
 
 Tiny Express server that verifies Google ID tokens and issues an HttpOnly session cookie. Runs **separately** from the frontend.
 

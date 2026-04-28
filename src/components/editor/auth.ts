@@ -1,4 +1,4 @@
-// Google Sign-In for ShotForge.
+// Google Sign-In for Markva.
 //
 // Two modes — pick one:
 //
@@ -29,7 +29,7 @@ export type AuthUser = {
   picture?: string;
 };
 
-const STORAGE_KEY = "shotforge.auth.user";
+const STORAGE_KEY = "markva.auth.user";
 
 const listeners = new Set<() => void>();
 let current: AuthUser | null = readInitial();

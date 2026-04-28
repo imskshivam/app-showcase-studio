@@ -11,7 +11,7 @@ export const Route = createFileRoute("/editor")({
   component: Editor,
   head: () => ({
     meta: [
-      { title: "Editor — ShotForge" },
+      { title: "Editor — Markva" },
       {
         name: "description",
         content:
@@ -51,7 +51,7 @@ function Editor() {
             </SheetContent>
           </Sheet>
 
-          <span className="text-sm font-bold">ShotForge</span>
+          <span className="text-sm font-bold">Markva</span>
 
           <Sheet open={rightOpen} onOpenChange={setRightOpen}>
             <SheetTrigger asChild>
