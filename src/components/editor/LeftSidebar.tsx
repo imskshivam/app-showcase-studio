@@ -1,4 +1,4 @@
-import { Smartphone, Download, Image as ImageIcon, Trash2, LogIn, LogOut, Ruler } from "lucide-react";
+import { Smartphone, Download, Image as ImageIcon, Trash2, Ruler } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,7 +13,6 @@ import { store, useStore, selectLayers } from "./store";
 import { PRESET_SIZES } from "./types";
 import { toPng } from "html-to-image";
 import { useState } from "react";
-import { signInWithGoogle, signOut, useAuth, GOOGLE_CLIENT_ID } from "./auth";
 import { toast } from "sonner";
 
 type Props = { canvasRef: React.RefObject<HTMLDivElement | null> };
@@ -24,7 +23,6 @@ export function LeftSidebar({ canvasRef }: Props) {
   const platform = useStore((s) => s.platform);
   const canvas = useStore((s) => s.canvas);
   const layers = useStore(selectLayers);
-  const user = useAuth();
 
   const isCustom = !PRESET_SIZES.some((p) => p.label === canvas.label);
   const [customW, setCustomW] = useState<string>(String(canvas.width));
@@ -41,17 +39,6 @@ export function LeftSidebar({ canvasRef }: Props) {
   };
 
   const exportPng = async () => {
-    // TEMP: auth bypass — treat everyone as logged in until GOOGLE_CLIENT_ID is set.
-    // To re-enable the gate, uncomment the block below.
-    // if (!user) {
-    //   try {
-    //     await signInWithGoogle();
-    //     toast.success("Signed in. Tap Export again to download.");
-    //   } catch (e: any) {
-    //     toast.error(e?.message ?? "Sign-in failed.");
-    //   }
-    //   return;
-    // }
     const node = canvasRef.current;
     if (!node) return;
     try {
@@ -68,15 +55,6 @@ export function LeftSidebar({ canvasRef }: Props) {
       a.click();
     } catch {
       toast.error("Export failed. Try again.");
-    }
-  };
-
-  const handleSignIn = async () => {
-    try {
-      await signInWithGoogle();
-      toast.success("Signed in with Google.");
-    } catch (e: any) {
-      toast.error(e?.message ?? "Sign-in failed.");
     }
   };
 
@@ -97,46 +75,6 @@ export function LeftSidebar({ canvasRef }: Props) {
           <h1 className="text-sm font-bold leading-none">Markva</h1>
           <p className="text-[11px] text-muted-foreground">App store screenshots</p>
         </div>
-      </div>
-
-      {/* Auth */}
-      <div className="rounded-lg border border-border bg-surface p-2">
-        {user ? (
-          <div className="flex items-center gap-2">
-            {user.picture ? (
-              <img
-                src={user.picture}
-                alt={user.name}
-                className="h-7 w-7 rounded-full"
-                referrerPolicy="no-referrer"
-              />
-            ) : (
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground">
-                {user.name.charAt(0)}
-              </div>
-            )}
-            <div className="min-w-0 flex-1">
-              <div className="truncate text-xs font-medium">{user.name}</div>
-              <div className="truncate text-[10px] text-muted-foreground">{user.email}</div>
-            </div>
-            <button
-              onClick={signOut}
-              className="rounded p-1 text-muted-foreground hover:text-destructive"
-              aria-label="Sign out"
-            >
-              <LogOut className="h-3.5 w-3.5" />
-            </button>
-          </div>
-        ) : (
-          <Button size="sm" variant="secondary" className="w-full" onClick={handleSignIn}>
-            <LogIn className="mr-1.5 h-3.5 w-3.5" /> Sign in with Google
-          </Button>
-        )}
-        {!GOOGLE_CLIENT_ID && (
-          <p className="mt-1 text-[10px] leading-tight text-muted-foreground">
-            Add your Google OAuth Client ID in <code>auth.ts</code> to enable sign-in.
-          </p>
-        )}
       </div>
 
       <div className="space-y-2">
