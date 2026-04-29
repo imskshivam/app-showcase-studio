@@ -1,26 +1,13 @@
-// Google Sign-In for Markva.
+// Google Sign-In for Markva — client-only.
 //
-// Two modes — pick one:
-//
-// 1) CLIENT-ONLY (default, no backend)
-//    - Set GOOGLE_CLIENT_ID below.
-//    - Leave AUTH_SERVER_URL = "".
-//    - The Google ID token is decoded in the browser. Fine for gating UI;
-//      NOT a real security boundary.
-//
-// 2) SERVER-VERIFIED (recommended for production)
-//    - Run the Express server in /server (see server/README.md).
-//    - Set AUTH_SERVER_URL to its origin, e.g. "http://localhost:8787".
-//    - The token is verified server-side and a HttpOnly cookie is issued.
-//    - Call hydrateAuth() once on app start to restore the session.
+// - Set GOOGLE_CLIENT_ID below to enable Google sign-in.
+// - The Google ID token is decoded in the browser and stored in localStorage.
+//   Fine for gating UI; NOT a real security boundary.
 
 import { useSyncExternalStore } from "react";
 
 // TODO: Replace with your own from https://console.cloud.google.com/apis/credentials
 export const GOOGLE_CLIENT_ID = "";
-
-// Leave "" to run client-only. Set to your auth server origin to enable server verification.
-export const AUTH_SERVER_URL = "";
 
 export type AuthUser = {
   sub: string;
@@ -72,7 +59,7 @@ export function useAuth(): AuthUser | null {
   );
 }
 
-// Decode JWT payload (no verification — only used in client-only mode).
+// Decode JWT payload (no verification — client-only mode).
 function decodeJwt<T>(token: string): T {
   const payload = token.split(".")[1];
   const json = atob(payload.replace(/-/g, "+").replace(/_/g, "/"));
@@ -96,18 +83,6 @@ function loadGis(): Promise<void> {
   return gisLoading;
 }
 
-async function exchangeCredentialWithServer(credential: string): Promise<AuthUser> {
-  const res = await fetch(`${AUTH_SERVER_URL}/auth/google`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ credential }),
-  });
-  if (!res.ok) throw new Error(`Auth server rejected token (${res.status})`);
-  const { user } = (await res.json()) as { user: AuthUser };
-  return user;
-}
-
 /** Trigger Google sign-in. Resolves with the signed-in user. */
 export async function signInWithGoogle(): Promise<AuthUser> {
   if (!GOOGLE_CLIENT_ID) {
@@ -121,25 +96,20 @@ export async function signInWithGoogle(): Promise<AuthUser> {
     try {
       google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
-        callback: async (resp: { credential: string }) => {
+        callback: (resp: { credential: string }) => {
           try {
-            let user: AuthUser;
-            if (AUTH_SERVER_URL) {
-              user = await exchangeCredentialWithServer(resp.credential);
-            } else {
-              const payload = decodeJwt<{
-                sub: string;
-                name: string;
-                email: string;
-                picture?: string;
-              }>(resp.credential);
-              user = {
-                sub: payload.sub,
-                name: payload.name,
-                email: payload.email,
-                picture: payload.picture,
-              };
-            }
+            const payload = decodeJwt<{
+              sub: string;
+              name: string;
+              email: string;
+              picture?: string;
+            }>(resp.credential);
+            const user: AuthUser = {
+              sub: payload.sub,
+              name: payload.name,
+              email: payload.email,
+              picture: payload.picture,
+            };
             auth.set(user);
             resolve(user);
           } catch (e) {
@@ -158,34 +128,6 @@ export async function signInWithGoogle(): Promise<AuthUser> {
   });
 }
 
-/** Restore session from the auth server cookie. Call once on app startup. */
-export async function hydrateAuth(): Promise<void> {
-  if (!AUTH_SERVER_URL) return;
-  try {
-    const res = await fetch(`${AUTH_SERVER_URL}/auth/me`, {
-      credentials: "include",
-    });
-    if (!res.ok) {
-      auth.set(null);
-      return;
-    }
-    const { user } = (await res.json()) as { user: AuthUser | null };
-    auth.set(user);
-  } catch {
-    /* offline — keep current state */
-  }
-}
-
 export async function signOut() {
-  if (AUTH_SERVER_URL) {
-    try {
-      await fetch(`${AUTH_SERVER_URL}/auth/logout`, {
-        method: "POST",
-        credentials: "include",
-      });
-    } catch {
-      /* ignore */
-    }
-  }
   auth.set(null);
 }
